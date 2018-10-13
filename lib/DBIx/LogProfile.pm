@@ -135,13 +135,18 @@ sub flush_to_logger {
 
   }
 
+  # Discard accumulated profiling data
   $self->empty();
 
 }
 
 sub on_destroy {
   my ($self) = @_;
+
+  # During global destruction, loggers might no longer exist.
+  # Since END blocks are executed beforehand, this is okay!?
   return if ${^GLOBAL_PHASE} eq 'DESTRUCT';
+
   $self->flush_to_logger();
 }
 
@@ -184,20 +189,20 @@ DBIx::LogProfile - Log DBI::Profile data into Log::Any or Log4perl
   ...
   # Values as per DBI::Profile::as_node_path_list().
   # Additionally `path` indicating the `Path`, and 
-  # one pair for each element of the path.
+  # one key-value pair for each element of the path.
   #
   # Formatting of the values in your logfile will vary
   # based on your configuration of the logger you use.
 
 =head1 DESCRIPTION
 
-This module allows you to smuggle DBI::Profile data (like SQL
+This module allows you to smuggle C<DBI::Profile> data (like SQL
 statements that have been executed, alongside frequency and
 time statistics) into an existing application's log without
 making changes to the application itself, using the environment
-variable C<DBI_PROFILE>. This can be useful when you have a 
-centralised structured logging facility and need information 
-about DBI activity in it.
+variable C<DBI_PROFILE>. This can be useful, for instance,
+when you have a centralised structured logging facility and
+need information about C<DBI> activity in it.
 
 =head1 CONSTRUCTOR
 
@@ -231,8 +236,8 @@ C<count> and C<Limit> is set to C<1>, like in
 
   DBI_PROFILE='2/DBIx::LogProfile/OrderByDesc:count:Limit:1'
 
-then this module will log only the most frequently processed
-statement and collected profile data in structured fields using 
+then this module will log only the one most frequently processed
+statement (and collected profile data in structured fields) using
 the C<trace> log level using C<Log::Any> (the defaults).
 
 The values will be passed as structured data to the logger, as hash
@@ -318,7 +323,7 @@ used at runtime, and would flush all relevant profile data if it is.
 =head1 ACKNOWLEDGEMENTS
 
 Thanks to the people on #perl on Freenode for the suggestion to 
-call flush_to_logger during C<END>.
+call C<flush_to_logger> during C<END>.
 
 =head1 AUTHOR / COPYRIGHT / LICENSE
 
