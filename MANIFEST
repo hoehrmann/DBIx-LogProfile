@@ -1,0 +1,9 @@
+eg/example.pl
+MANIFEST
+t/99podcov.t
+t/98podsyn.t
+t/01basic.t
+lib/DBIx/LogProfile.pm
+README
+Changes
+Makefile.PL
