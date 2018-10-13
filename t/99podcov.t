@@ -12,5 +12,5 @@ plan tests => 1;
 
 # new and parse are in the synopsis, that's good enough
 pod_coverage_ok('DBIx::LogProfile',
-#  { trustme => [qr/new|parse/] }
+  { trustme => [qr/on_destroy/] }
 );

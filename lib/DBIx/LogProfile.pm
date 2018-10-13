@@ -1,4 +1,4 @@
-package LogProfile;
+package DBIx::LogProfile;
 use strict;
 use warnings;
 use parent 'DBI::Profile';
