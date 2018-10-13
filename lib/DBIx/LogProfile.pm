@@ -4,7 +4,7 @@ use warnings;
 use parent 'DBI::Profile';
 use Log::Any;
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 sub new {
 
@@ -218,7 +218,7 @@ options are supported:
     ...
 
 For instance, if your C<Path> is C<!Statement>, C<OrderByDesc> is
-'count' and C<Limit> is set to 1, like in 
+C<count> and C<Limit> is set to C<1>, like in
 
   DBI_PROFILE='2/DBIx::LogProfile/OrderByDesc:count:Limit:1'
 
@@ -230,12 +230,12 @@ The values will be passed as structured data to the logger, as hash
 for C<Log::Any>, and as MDC data for C<Log::Log4perl>. The log message
 for either is a string containing the substring C<DBIx::LogProfile>.
 
-Note that DBI::Profile supports a normliser function that can replace
-variable parts of queries using some heuristics which is very useful 
+Note that C<DBI::Profile> supports a normaliser function that can replace
+variable parts of queries using some heuristics, which is very useful
 to group queries that are not prepared with bind parameters. You can
-enable it e.g. like so:
+enable it like so:
 
-  DBI_PROFILE='&norm_std_n3/DBIx::LogProfile::LogProfile/...'
+  DBI_PROFILE='&norm_std_n3/DBIx::LogProfile/...'
 
 Instead of reporting individual statements like 
 
