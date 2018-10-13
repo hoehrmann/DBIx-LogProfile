@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use parent 'DBI::Profile';
 use Log::Any;
+use Sub::Util 1.40;
 
 our $VERSION = 0.02;
 
@@ -61,10 +62,19 @@ sub flush_to_logger {
     my %h;
     @h{ @fields } = @$statistics;
 
-    $h{path} = join ':', @{ $self->{Path} };
+    my @mapped_path = map {
+      s/^&DBI::ProfileSubs::/&/;
+      $_
+    } map {
+      'CODE' eq ref($_)
+        ? '&' . Sub::Util::subname($_)
+        : $_
+    } @{ $self->{Path} };
 
-    for my $i ( 1 .. @keys ) {
-      $h{ "key$i" } = $keys[ $i - 1 ];
+    $h{path} = join ':', @mapped_path;
+
+    for my $ix ( 0 .. @keys - 1 ) {
+      $h{ $mapped_path[ $ix ] } = $keys[ $ix ];
     }
 
     \%h;
@@ -73,7 +83,7 @@ sub flush_to_logger {
 
   my @sorted;
   
-  if ($self->{OrderByDesc} !~ /^key/) {
+  if ($self->{OrderByDesc} !~ /^[^a-z]/) {
     @sorted = sort {
       $b->{ $self->{OrderByDesc} } 
       <=>
@@ -162,6 +172,7 @@ DBIx::LogProfile - Log DBI::Profile data into Log::Any or Log4perl
   % DBI_PROFILE='2/DBIx::LogProfile/Log:Any:Level:trace' ex.pl
   % cat ex.log
   ...
+    "!Statement"           : "DELETE FROM Vertex WHERE vertex = ?"
     "count"                : 10626,
     "total_duration"       : 0.0804088115692139
     "first_duration"       : 0.000133037567138672,
@@ -170,12 +181,10 @@ DBIx::LogProfile - Log DBI::Profile data into Log::Any or Log4perl
     "time_of_first_sample" : 1539396350.63128,
     "time_of_last_sample"  : 1539396364.50785,
     "path"                 : "!Statement",
-    "key1"                 :
-      "\n    DELETE FROM Vertex WHERE vertex_name = ?\n  "
   ...
   # Values as per DBI::Profile::as_node_path_list().
   # Additionally `path` indicating the `Path`, and 
-  # a `key<N>` value for each value on that path.
+  # one pair for each element of the path.
   #
   # Formatting of the values in your logfile will vary
   # based on your configuration of the logger you use.
@@ -229,6 +238,10 @@ the C<trace> log level using C<Log::Any> (the defaults).
 The values will be passed as structured data to the logger, as hash
 for C<Log::Any>, and as MDC data for C<Log::Log4perl>. The log message
 for either is a string containing the substring C<DBIx::LogProfile>.
+
+This module will log an error using C<Log::Any> if it fails to report
+profile data to the logger. This module logs but does not rethrow
+exceptions caught in that process.
 
 Note that C<DBI::Profile> supports a normaliser function that can replace
 variable parts of queries using some heuristics, which is very useful

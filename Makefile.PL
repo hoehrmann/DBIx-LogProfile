@@ -9,6 +9,7 @@ WriteMakefile(
   TEST_REQUIRES       => {
     'Test::More'      => 0,
     'Log::Any'        => '1.050',
+    'Sub::Util'       => '1.40',
     'DBI::Profile'    => 0,
   },
   ($] >= 5.005 ?     
